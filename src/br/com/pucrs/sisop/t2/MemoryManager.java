@@ -31,8 +31,6 @@ public class MemoryManager {
     }
 
     public MemoryManager(String algo, int pageSize, int memorySize, int diskSize) {
-        this.swapAlgo = algo.equals("lru") ? new LRU() : new Random(ram);
-
         this.pageSize = pageSize;
         this.memorySize = memorySize;
         this.diskSize = diskSize;
@@ -41,6 +39,8 @@ public class MemoryManager {
         this.disk = new Page[diskSize / pageSize];
 
         this.createPages();
+
+        this.swapAlgo = algo.equals("lru") ? new LRU() : new Random(ram);
     }
 
     public String access(String process, int memoryPosition) {
@@ -211,19 +211,7 @@ public class MemoryManager {
     }
 
     private boolean hasEnoughSpaceInRam(int size) {
-        int free = 0;
-
-        //Check for free space in RAM
-        for (int i = 0; i < ram.length; i++) {
-            if (ram[i].isFree()) {
-                free += pageSize;
-
-                if (free >= size)
-                    return true;
-            }
-        }
-
-        return false;
+        return getFreeSpaceInRam() >= size;
     }
 
     private int getFreeSpaceInRam() {

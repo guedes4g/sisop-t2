@@ -16,9 +16,10 @@ public class Process {
         this.pageSize = pageSize;
     }
 
-    public void increasePage(Page p){
+    public void increasePage(Page p, int round){
         p.setProcess(this);
-        p.setOrder(pages.size() + 1);
+        p.setOrder(pages.size());
+        p.setLastTimeAccessed(round);
 
         this.pages.add(p);
     }
@@ -30,6 +31,10 @@ public class Process {
     public boolean canAccess(int memoryPosition) {
         //pega a página e verifica se está na RAM
         return getPage(memoryPosition).isInRAM();
+    }
+
+    public void read(int memoryPosition, int round) {
+        getPage(memoryPosition).setLastTimeAccessed(round);
     }
 
     public Page getPage(int memoryPosition) {

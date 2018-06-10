@@ -15,8 +15,9 @@ public class MemoryManager {
 
     private Map<String, Process> processes = new HashMap();
 
-    private Page[] ram;
-    private Page[] disk;
+    private Page[] ram, disk;
+
+    private int rounds = 0;
 
     public int getPageSize() {
         return pageSize;
@@ -40,12 +41,15 @@ public class MemoryManager {
 
         this.createPages();
 
-        this.swapAlgo = algo.equals("lru") ? new LRU() : new Random(ram);
+        this.swapAlgo = algo.equals("lru") ? new LRU(ram) : new Random(ram);
     }
 
     public String access(String process, int memoryPosition) {
         StringBuilder sb = new StringBuilder();
         Process p;
+
+        //sum the rounds
+        rounds++;
 
         if (processes.containsKey(process)) {
             p = processes.get(process);
@@ -53,8 +57,11 @@ public class MemoryManager {
             //Verifica se há erro de invasão de memória
             if (!p.hasSegmentationFault(memoryPosition)) {
                 //Verifica se é possível acessar essa posição de memória
-                if (p.canAccess(memoryPosition))
+                if (p.canAccess(memoryPosition)) {
+                    p.read(memoryPosition, rounds);
+
                     return "OK.";
+                }
 
                 //Isso significa que precisamos fazer SWAP
                 else {
@@ -68,6 +75,9 @@ public class MemoryManager {
                         makePageAvailableInRam(p.getPage(memoryPosition));
 
                         sb.append(printRamAndDisk());
+
+                        //finalize the reading
+                        p.read(memoryPosition, rounds);
                     }
                     else
                         return "SWAP necessário. Não há espaço para SWAP. Disco cheio.";
@@ -85,6 +95,9 @@ public class MemoryManager {
     public String create(String process, int size) {
         StringBuilder sb = new StringBuilder();
         Process p;
+
+        //sum the rounds
+        rounds++;
 
         if (!processes.containsKey(process)) {
             if (hasEnoughSpaceInRam(size)) {
@@ -116,6 +129,9 @@ public class MemoryManager {
     public String terminate(String process) {
         Process p;
 
+        //sum the rounds
+        rounds++;
+
         if (processes.containsKey(process)) {
             //finalizo o processo
             p = processes.get(process);
@@ -134,6 +150,9 @@ public class MemoryManager {
         int amountFree, amountNeededToAllocate;
         StringBuilder sb = new StringBuilder();
         Process p;
+
+        //sum the rounds
+        rounds++;
 
         if (processes.containsKey(process)) {
             p = processes.get(process);
@@ -213,7 +232,7 @@ public class MemoryManager {
         int iterations = (int) Math.ceil(size * 1.0 / pageSize);
 
         for (;iterations > 0; iterations--)
-            p.increasePage(getNextFreePageInRam());
+            p.increasePage(getNextFreePageInRam(), rounds);
     }
 
     private Page getNextFreePageInRam() {

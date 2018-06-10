@@ -5,6 +5,8 @@ public class Page {
     private char memory;
     private int order;
 
+    private int lastTimeAccessed = 0;
+
     public Page(char memory) {
         this.memory = memory;
     }
@@ -43,5 +45,13 @@ public class Page {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    public int getLastTimeAccessed() {
+        return lastTimeAccessed;
+    }
+
+    public void setLastTimeAccessed(int time) {
+        lastTimeAccessed = time;
     }
 }

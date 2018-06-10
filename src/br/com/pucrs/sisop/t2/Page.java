@@ -1,12 +1,10 @@
 package br.com.pucrs.sisop.t2;
 
 public class Page {
-    private int size;
     private Process p;
     private char memory;
 
-    public Page(int size, char memory) {
-        this.size = size;
+    public Page(char memory) {
         this.memory = memory;
     }
 

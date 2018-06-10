@@ -21,12 +21,20 @@ public class RandomThread extends Thread {
     public void run()
     {
         while(!this.terminated) {
+            StringBuilder sb = new StringBuilder();
+
+            sb.append("["+ this.processName +"]");
+            sb.append(mm.access(this.processName, generateRandomMemoryAccess()) + '\n');
+            sb.append("["+ this.processName +"]");
+            
             if (generateRandomProbability() < probabilityTerminate) {
-                mm.expand(processName, generateRandomProcessSize());
+                sb.append(mm.expand(processName, generateRandomProcessSize()));
                 this.terminated = true;
             } else if (generateRandomProbability() < probabilityAllocate) {
-                mm.terminate(processName);
+                sb.append(mm.terminate(processName));
             }
+
+            System.out.println(sb.toString());
         }
     }
     private double generateRandomProbability(){
@@ -36,4 +44,8 @@ public class RandomThread extends Thread {
     private int generateRandomProcessSize(){
         return ThreadLocalRandom.current().nextInt(1, this.mm.getPageSize()+ 1);
     }
+    private int generateRandomMemoryAccess(){
+        return ThreadLocalRandom.current().nextInt(0, this.mm.getMemorySize());
+    }
+
 }

@@ -27,10 +27,12 @@ public class Process {
     }
 
     public boolean canAccess(int memoryPosition) {
-        int page = memoryPosition / pageSize;
-
         //pega a página e verifica se está na RAM
-        return pages.get(page).isInRAM();
+        return getPage(memoryPosition).isInRAM();
+    }
+
+    public Page getPage(int memoryPosition) {
+        return pages.get(memoryPosition / pageSize);
     }
 
     public void increaseSize(int size){

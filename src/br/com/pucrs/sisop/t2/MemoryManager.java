@@ -121,7 +121,7 @@ public class MemoryManager {
     }
 
     private void grantPages(Process p, int size) {
-        int iterations = (int) Math.ceil(size / pageSize);
+        int iterations = (int) Math.ceil(size * 1.0 / pageSize);
 
         for (;iterations > 0; iterations--)
             p.increasePage(getNextFreePage());

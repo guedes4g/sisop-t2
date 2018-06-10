@@ -3,6 +3,7 @@ package br.com.pucrs.sisop.t2.model;
 public class Page {
     private Process p;
     private char memory;
+    private int order;
 
     public Page(char memory) {
         this.memory = memory;
@@ -14,6 +15,11 @@ public class Page {
 
     public boolean isFree() {
         return p == null;
+    }
+
+    public void clean() {
+        this.p = null;
+        this.order = 0;
     }
 
     public Process getProcess() {
@@ -29,5 +35,13 @@ public class Page {
             memory = 'D';
         else
             memory = 'R';
+    }
+
+    public String toString() {
+        return isFree() ? "00" : p.toString() + "("+order+")";
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

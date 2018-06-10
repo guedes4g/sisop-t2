@@ -18,6 +18,7 @@ public class Process {
 
     public void increasePage(Page p){
         p.setProcess(this);
+        p.setOrder(pages.size() + 1);
 
         this.pages.add(p);
     }
@@ -45,6 +46,10 @@ public class Process {
 
     public void terminate() {
         for (Page p : pages)
-            p.setProcess(null);
+            p.clean();
+    }
+
+    public String toString() {
+        return id;
     }
 }

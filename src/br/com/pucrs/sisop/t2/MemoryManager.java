@@ -164,6 +164,10 @@ public class MemoryManager {
 
     private void createFreeSpaceInRam(int size) {
         //TBD: pegar espaços vazios do disco e invocar o swap
+        int iterations = (int) Math.ceil(size * 1.0 / pageSize);
+
+        for (;iterations > 0; iterations--)
+            swap(getNextFreePageInDisk());
     }
 
     private void confirmProcessCreation(String process, int size) {

@@ -53,9 +53,9 @@ public class Program {
     }
 
     private static void instanciateMemoryManager(BufferedReader br) throws IOException {
-        mode = br.readLine();
+        mode = br.readLine().toLowerCase();
 
-        String algo = br.readLine();
+        String algo = br.readLine().toLowerCase();
         int pageSize = Integer.parseInt(br.readLine());
         int memorySize = Integer.parseInt(br.readLine());
         int diskSize = Integer.parseInt(br.readLine());
@@ -74,7 +74,7 @@ public class Program {
             //0 -> command type
             //1 -> process name
             //2 -> memory size
-            switch (blocks[0]) {
+            switch (blocks[0].toUpperCase()) {
                 case "C":
                     mm.create(blocks[1], Integer.parseInt(blocks[2]));
                     break;

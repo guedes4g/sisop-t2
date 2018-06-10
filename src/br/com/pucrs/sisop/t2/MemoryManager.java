@@ -41,7 +41,7 @@ public class MemoryManager {
         this.createPages();
     }
 
-    public void access(String process, int memoryPosition) {
+    public String access(String process, int memoryPosition) {
         Process p;
 
         if (processes.containsKey(process)) {
@@ -50,38 +50,37 @@ public class MemoryManager {
             //Verifica se há erro de invasão de memória
             if (!p.hasSegmentationFault(memoryPosition)) {
                 //Verifica se é possível acessar essa posição de memória
-                if (p.canAccess(memoryPosition)) {
-                    System.out.print("OK.");
-                }
-                else {
-                    //Isso significa que precisamos fazer SWAP
-                    System.out.print("SWAP necessário. ");
+                if (p.canAccess(memoryPosition))
+                    return "OK.";
 
+                //Isso significa que precisamos fazer SWAP
+                else {
                     //Verificar se há espaço para SWAP
                     if (hasEnoughSpaceToSwap()) {
                         //Faz o SWAP
                         swap(p.getPage(memoryPosition));
-                        System.out.print("OK.");
+
+                        return "OK. SWAP necessário.";
                     }
                     else
-                        System.out.print("Não há espaço para SWAP. Disco cheio.");
+                        return "SWAP necessário. Não há espaço para SWAP. Disco cheio.";
                 }
             }
             else
-                System.out.print("Segmentation fault.");
+                return "Segmentation fault.";
         }
         else
-            System.out.print("Processo não existe.");
+            return "Processo não existe.";
     }
 
-    public void create(String process, int size) {
+    public String create(String process, int size) {
         Process p;
 
         if (!processes.containsKey(process)) {
             if (hasEnoughSpaceInRam(size)) {
                 confirmProcessCreation(process, size);
 
-                System.out.print("OK. Criou normal.");
+                return "OK. Criou normal.";
             }
             else {
                 if (hasEnoughSpaceToSwap(size)) {
@@ -89,17 +88,17 @@ public class MemoryManager {
 
                     confirmProcessCreation(process, size);
 
-                    System.out.print("OK. Criou a partir de SWAP.");
+                    return "OK. Criou a partir de SWAP.";
                 }
                 else
-                    System.out.println("Não tem mais memória.");
+                    return "Não tem mais memória.";
             }
         }
         else
-            System.out.print("Erro ao criar processo. Processo já existe.");
+            return "Erro ao criar processo. Processo já existe.";
     }
 
-    public void terminate(String process) {
+    public String terminate(String process) {
         Process p;
 
         if (processes.containsKey(process)) {
@@ -110,13 +109,13 @@ public class MemoryManager {
             //retiro do mapa
             processes.remove(process);
 
-            System.out.print("OK.");
+            return "OK.";
         }
         else
-            System.out.print("Processo não existe.");
+            return "Processo não existe.";
     }
 
-    public void expand(String process, int size) {
+    public String expand(String process, int size) {
         Process p;
         int amountFree, amountNeededToAllocate;
 
@@ -127,8 +126,9 @@ public class MemoryManager {
 
             //Tenta verificar se o processo possui páginas com espaço livre (o suficiente para permitir o increase)
             if (amountFree >= size) {
-                System.out.print("Espaço alocado com sucesso. Não foi necessário criar página (tinha espaço sobrando).");
                 p.increaseSize(size);
+
+                return "Espaço alocado com sucesso. Não foi necessário criar página (tinha espaço sobrando).";
             }
             else {
                 amountNeededToAllocate = size - amountFree;
@@ -140,7 +140,7 @@ public class MemoryManager {
                     confirmExpansionInProcess(p, size, amountNeededToAllocate);
 
                     //print
-                    System.out.print("Espaço alocado com sucesso. Criou direto nova página.");
+                    return "Espaço alocado com sucesso. Criou direto nova página.";
                 }
                 else {
                     if (hasEnoughSpaceToSwap(amountNeededToAllocate)) {
@@ -151,15 +151,15 @@ public class MemoryManager {
                         confirmExpansionInProcess(p, size, amountNeededToAllocate);
 
                         //print
-                        System.out.print("Espaço alocado com sucesso. Criou nova página a partir de SWAP.");
+                        return "Espaço alocado com sucesso. Criou nova página a partir de SWAP.";
                     }
                     else
-                        System.out.print("Não tem mais memória.");
+                        return "Não tem mais memória.";
                 }
             }
         }
         else
-            System.out.print("Processo não existe.");
+            return "Processo não existe.";
     }
 
     private void createFreeSpaceInRam(int size) {

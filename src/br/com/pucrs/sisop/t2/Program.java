@@ -1,11 +1,19 @@
 package br.com.pucrs.sisop.t2;
 
+import br.com.pucrs.sisop.t2.mode.RandomMode;
+import br.com.pucrs.sisop.t2.mode.SequentialMode;
+
 import java.io.*;
 import java.util.Scanner;
 
 public class Program {
     private static final String FILE_PATH_DEBUG = "./examples/e1.txt";
     private static final boolean DEBUG = true;
+
+    //Random mode variables
+    private static final int NUMBER_OF_THREADS = 10;
+    private static final double TERMINATE_PROBABILITY = 10;
+    private static final double EXPAND_PROBABILITY = 3;
 
     private static String mode;
     private static MemoryManager mm;
@@ -25,19 +33,22 @@ public class Program {
 
     private static void parseFile(String filePath) {
         File f = new File(filePath);
-        FileReader fr = null;
+        FileReader fr;
+        Runnable programMode;
 
         try {
             fr = new FileReader(f);
             BufferedReader br = new BufferedReader(fr);
 
             if (br.ready()) {
+                //initiate the Memory Manager (based on input file)
                 instanciateMemoryManager(br);
 
-                if (isSequentialMode())
-                    runSequentialMode(br);
-                else
-                    runRandomMode();
+                //decide which program we will run
+                programMode = isSequentialMode() ? getSequentialMode(br) : getRandomMode();
+
+                //and then, finally, run it
+                programMode.run();
             }
 
             br.close();
@@ -63,45 +74,12 @@ public class Program {
         mm = new MemoryManager(algo, pageSize, memorySize, diskSize);
     }
 
-    private static void runSequentialMode(BufferedReader br) throws IOException {
-        String line;
-
-        while ((line = br.readLine()) != null) {
-            String[] blocks = line.split(" ");
-
-            System.out.print("["+line+"] - ");
-
-            //0 -> command type
-            //1 -> process name
-            //2 -> memory size
-            switch (blocks[0].toUpperCase()) {
-                case "C":
-                    mm.create(blocks[1], Integer.parseInt(blocks[2]));
-                    break;
-
-                case "A":
-                    mm.access(blocks[1], Integer.parseInt(blocks[2]));
-                    break;
-
-                case "M":
-                    mm.expand(blocks[1], Integer.parseInt(blocks[2]));
-                    break;
-
-                case "T":
-                    mm.terminate(blocks[1]);
-                    break;
-            }
-
-            System.out.println("");
-        }
+    private static Runnable getSequentialMode(BufferedReader br) throws IOException {
+        return new SequentialMode(br, mm);
     }
 
-    private static void runRandomMode() {
-        double terminateProbability = 10;
-        double addMemoryProbability = 3;
-        int numberOfThreads = 1;
-        RandomMode rm = new RandomMode(terminateProbability, addMemoryProbability, numberOfThreads ,mm);
-        rm.run();
+    private static Runnable getRandomMode() {
+        return new RandomMode(TERMINATE_PROBABILITY, EXPAND_PROBABILITY, NUMBER_OF_THREADS, mm);
     }
 
     private static String readFileFromTerminal() {

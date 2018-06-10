@@ -15,35 +15,39 @@ public class SequentialMode implements Runnable {
     }
 
     public void run() {
-        String line;
+        String line, buffer = "", process;
+        String[] blocks;
+        int parameter = 0;
 
         try {
             while ((line = br.readLine()) != null) {
-                String[] blocks = line.split(" ");
-                String ret = "";
+                blocks = line.split(" ");
 
-                //0 -> command type
-                //1 -> process name
-                //2 -> memory size
+                //parse parameters
+                process = blocks[1];
+
+                if (blocks.length > 2)
+                    parameter = Integer.parseInt(blocks[2]);
+
                 switch (blocks[0].toUpperCase()) {
                     case "C":
-                        ret = mm.create(blocks[1], Integer.parseInt(blocks[2]));
+                        buffer = mm.create(process, parameter);
                         break;
 
                     case "A":
-                        ret = mm.access(blocks[1], Integer.parseInt(blocks[2]));
+                        buffer = mm.access(process, parameter);
                         break;
 
                     case "M":
-                        ret = mm.expand(blocks[1], Integer.parseInt(blocks[2]));
+                        buffer = mm.expand(process, parameter);
                         break;
 
                     case "T":
-                        ret = mm.terminate(blocks[1]);
+                        buffer = mm.terminate(process);
                         break;
                 }
 
-                System.out.println("["+line+"] - " + ret);
+                System.out.println("["+line+"] - " + buffer);
             }
         } catch (IOException e) {
             e.printStackTrace();

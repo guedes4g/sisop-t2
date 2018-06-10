@@ -23,7 +23,7 @@ public class Process {
     }
 
     public boolean hasSegmentationFault(int memoryPosition) {
-        return memoryPosition >= (pages.size() * pageSize);
+        return memoryPosition >= size;
     }
 
     public boolean canAccess(int memoryPosition) {

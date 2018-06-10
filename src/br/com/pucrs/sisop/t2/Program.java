@@ -97,7 +97,11 @@ public class Program {
     }
 
     private static void runRandomMode() {
-        //TBD
+        double terminateProbability = 10;
+        double addMemoryProbability = 3;
+        int numberOfThreads = 10;
+        RandomMode rm = new RandomMode(terminateProbability, addMemoryProbability, numberOfThreads ,mm);
+        rm.run();
     }
 
     private static String readFileFromTerminal() {

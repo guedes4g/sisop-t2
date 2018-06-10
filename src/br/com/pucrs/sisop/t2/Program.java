@@ -1,15 +1,17 @@
 package br.com.pucrs.sisop.t2;
 
 import java.io.*;
+import java.util.Scanner;
 
 public class Program {
     private static final String FILE_PATH_DEBUG = "./examples/e1.txt";
     private static final boolean DEBUG = true;
+
     private static String mode;
     private static MemoryManager mm;
 
     public static void main(String[] args) {
-        System.out.print("Digite o path do arquivo de entrada: ");
+        System.out.println("Digite o path do arquivo de entrada: ");
 
         //get file input
         String file = DEBUG ? FILE_PATH_DEBUG : readFileFromTerminal();
@@ -99,8 +101,8 @@ public class Program {
     }
 
     private static String readFileFromTerminal() {
-        //TBD:
-        return null;
+        Scanner s = new Scanner(System.in);
+        return s.nextLine();
     }
 
     private static boolean isSequentialMode() {

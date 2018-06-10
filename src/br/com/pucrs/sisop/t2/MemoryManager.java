@@ -1,10 +1,14 @@
 package br.com.pucrs.sisop.t2;
 
+import br.com.pucrs.sisop.t2.swapalgo.LRU;
+import br.com.pucrs.sisop.t2.swapalgo.Random;
+import br.com.pucrs.sisop.t2.swapalgo.SwapAlgorithm;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryManager {
-    private Algorithm algo;
+    private SwapAlgorithm swapAlgo;
     private int pageSize, memorySize, diskSize;
 
     private Map<String, Process> processes = new HashMap();
@@ -13,7 +17,7 @@ public class MemoryManager {
     private Page[] disk;
 
     public MemoryManager(String algo, int pageSize, int memorySize, int diskSize) {
-        this.algo = algo.equals("lru") ? Algorithm.LRU : Algorithm.Random;
+        this.swapAlgo = algo.equals("lru") ? new LRU() : new Random(ram);
 
         this.pageSize = pageSize;
         this.memorySize = memorySize;
@@ -39,9 +43,16 @@ public class MemoryManager {
                 }
                 else {
                     //Isso significa que precisamos fazer SWAP
-                    System.out.print("SWAP necessário.");
+                    System.out.print("SWAP necessário. ");
 
                     //Verificar se há espaço para SWAP
+                    if (hasEnoughSpaceToSwap()) {
+                        //Faz o SWAP
+                        swap(p.getPage(memoryPosition));
+                        System.out.print("OK.");
+                    }
+                    else
+                        System.out.print("Não há espaço para SWAP. Disco cheio.");
                 }
             }
             else
@@ -54,19 +65,26 @@ public class MemoryManager {
     public void create(String process, int size) {
         Process p;
 
-        if (!processes.containsKey(process))
-            if (hasEnoughSpace(size)) {
-                //Cria o processo
-                p = new Process(process, size, this.pageSize);
-                processes.put(process, p);
+        if (!processes.containsKey(process)) {
+            if (hasEnoughSpaceInRam(size)) {
+                confirmProcessCreation(process, size);
 
-                //Vincula as páginas
-                grantPages(p, size);
-
-                System.out.print("OK.");
+                System.out.print("OK. Criou normal.");
             }
-            else
-                System.out.print("Erro ao criar processo. Processo já existe.");
+            else {
+                if (hasEnoughSpaceToSwap(size)) {
+                    createFreeSpaceInRam(size);
+
+                    confirmProcessCreation(process, size);
+
+                    System.out.print("OK. Criou a partir de SWAP.");
+                }
+                else
+                    System.out.println("Não tem mais memória.");
+            }
+        }
+        else
+            System.out.print("Erro ao criar processo. Processo já existe.");
     }
 
     public void terminate(String process) {
@@ -88,7 +106,7 @@ public class MemoryManager {
 
     public void expand(String process, int size) {
         Process p;
-        int amountFree;
+        int amountFree, amountNeededToAllocate;
 
         if (processes.containsKey(process)) {
             p = processes.get(process);
@@ -101,18 +119,30 @@ public class MemoryManager {
                 p.increaseSize(size);
             }
             else {
+                amountNeededToAllocate = size - amountFree;
+
                 //Caso não tenha "o suficiente", verifica se há página para ser alocada
                 //"Tamanho real que quero alocar" - "quanto já posso alocar com minhas páginas"
-                if (hasEnoughSpace(size - amountFree)) {
-                    //Em caso afirmativo, concede o total de páginas necessárias para o processo
-                    grantPages(p, size - amountFree);
-                    p.increaseSize(size);
+                if (hasEnoughSpaceInRam(amountNeededToAllocate)) {
+                    //Apenas Confirma a expansão
+                    confirmExpansionInProcess(p, size, amountNeededToAllocate);
 
                     //print
-                    System.out.print("Espaço alocado com sucesso. Nova página.");
+                    System.out.print("Espaço alocado com sucesso. Criou direto nova página.");
                 }
                 else {
-                    //TBD:
+                    if (hasEnoughSpaceToSwap(amountNeededToAllocate)) {
+                        //Cria espaço livre na RAM
+                        createFreeSpaceInRam(amountNeededToAllocate);
+
+                        //Confirma a expansão
+                        confirmExpansionInProcess(p, size, amountNeededToAllocate);
+
+                        //print
+                        System.out.print("Espaço alocado com sucesso. Criou nova página a partir de SWAP.");
+                    }
+                    else
+                        System.out.print("Não tem mais memória.");
                 }
             }
         }
@@ -120,24 +150,52 @@ public class MemoryManager {
             System.out.print("Processo não existe.");
     }
 
+    private void createFreeSpaceInRam(int size) {
+        //TBD: pegar espaços vazios do disco e invocar o swap
+    }
+
+    private void confirmProcessCreation(String process, int size) {
+        //Cria o processo
+        Process p = new Process(process, size, this.pageSize);
+        processes.put(process, p);
+
+        //Vincula as páginas
+        grantPages(p, size);
+    }
+
+    private void confirmExpansionInProcess(Process p, int realSize, int pageAllocationSize) {
+        //Em caso afirmativo, concede o total de páginas necessárias para o processo
+        grantPages(p, pageAllocationSize);
+        p.increaseSize(realSize);
+    }
+
     private void grantPages(Process p, int size) {
         int iterations = (int) Math.ceil(size * 1.0 / pageSize);
 
         for (;iterations > 0; iterations--)
-            p.increasePage(getNextFreePage());
+            p.increasePage(getNextFreePageInRam());
     }
 
-    private Page getNextFreePage() {
-        for (int i = 0; i < ram.length; i++)
-            if (ram[i].isFree())
-                return ram[i];
+    private Page getNextFreePageInRam() {
+        return getNextFreePage(ram);
+    }
+
+    private Page getNextFreePageInDisk() {
+        return getNextFreePage(disk);
+    }
+
+    private Page getNextFreePage(Page[] list) {
+        for (int i = 0; i < list.length; i++)
+            if (list[i].isFree())
+                return list[i];
 
         return null;
     }
 
-    private boolean hasEnoughSpace(int size) {
+    private boolean hasEnoughSpaceInRam(int size) {
         int free = 0;
 
+        //Check for free space in RAM
         for (int i = 0; i < ram.length; i++) {
             if (ram[i].isFree()) {
                 free += pageSize;
@@ -150,11 +208,109 @@ public class MemoryManager {
         return false;
     }
 
+    private int getFreeSpaceInRam() {
+        return getFreeSpace(ram);
+    }
+
+    private int getFreeSpaceInDisk() {
+        return getFreeSpace(disk);
+    }
+
+    private int getFreeSpace(Page[] list) {
+        int free = 0;
+
+        for (int i = 0; i < list.length; i++) {
+            if (list[i].isFree())
+                free += pageSize;
+        }
+
+        return free;
+    }
+
     private void createPages() {
         for (int i = 0; i < ram.length; i++)
-            ram[i] = new Page(pageSize, 'R');
+            ram[i] = new Page('R');
 
         for (int i = 0; i < disk.length; i++)
-            disk[i] = new Page(pageSize, 'D');
+            disk[i] = new Page('D');
+    }
+
+    private boolean hasEnoughSpaceToSwap(int amountNeededToAllocate) {
+        int free = getFreeSpaceInDisk() + getFreeSpaceInRam();
+
+        return free >= amountNeededToAllocate;
+    }
+
+    private boolean hasEnoughSpaceToSwap() {
+        return hasEnoughSpaceToSwap(pageSize);
+    }
+
+    private void swap(Page page) {
+        //Primeiro, tenta realizar um SWAP "óbvio". Ou seja, tenho posição livre em RAM.
+        if (hasEnoughSpaceInRam(pageSize))
+            //swap on free RAM
+            swapInFreeRam(page);
+
+        //Segundo, usa o algoritmo "inteligente"
+        else
+            swapUsingAlgo(page);
+    }
+
+    private void swapUsingAlgo(Page pageDisk) {
+        Page pageRam = swapAlgo.getPage();
+        Page freeInDisk = getNextFreePageInDisk();
+
+        //pega a RAM e bota no livre em disco
+        //pega o que queremos no disco e bota na RAM
+        //pega o antigo livre em disco e bota no antigo do que queremos
+        swap(pageRam, pageDisk, freeInDisk);
+    }
+
+    private void swapInFreeRam(Page page) {
+        //Pega a primeira posição na RAM que não está mais sendo usada
+        Page free = getNextFreePageInRam();
+
+        //Faz a troca pelo disco (não precisa levar em consideração o espaço vazio)
+        swap(free, page);
+    }
+
+    private void swap(Page pRam, Page pDiskWanted, Page pDiskFree) {
+        //Troca o livre pelo wanted
+        int indexFree = indexOfDisk(pDiskFree);
+        int indexWanted = indexOfDisk(pDiskWanted);
+
+        disk[indexFree] = pDiskWanted;
+        disk[indexWanted] = pDiskFree;
+
+        swap(pRam, pDiskWanted);
+    }
+
+    private void swap(Page pRam, Page pDisk) {
+        //get index
+        int indexRam = indexOfRam(pRam);
+        int indexDisk = indexOfDisk(pDisk);
+
+        disk[indexDisk] = pRam;
+        ram[indexRam] = pDisk;
+
+        //update the process cache
+        pRam.swap();
+        pDisk.swap();
+    }
+
+    private int indexOfDisk(Page p) {
+        return indexOfList(disk, p);
+    }
+
+    private int indexOfRam(Page p) {
+        return indexOfList(ram, p);
+    }
+
+    private int indexOfList(Page[] list, Page p) {
+        for (int i = 0; i < list.length; i++)
+            if (list[i] == p)
+                return i;
+
+        return -1;
     }
 }

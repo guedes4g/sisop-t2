@@ -1,0 +1,57 @@
+sequencial <— aqui a entrada pode ser 0/1, sequencial/aleatorio, s/a …
+lru <— escolha do algoritmo de troca - pode ser lru/aleatorio
+8
+64 <— 8 páginas - endereços físicos vão de 0 .. 63
+16 <— 2 páginas em disco
+C p1 16 <— aloca 2 páginas para p1 - endereços de 0 .. 15 - físico 0 .. 15 - páginas 0 e 1
+C p2 18 <— aloca 3 páginas para p2 - endereços de 0 .. 17 - físico 16 .. 33 - páginas 2, 3 e 4 
+C p3 10 <— aloca 2 páginas para p3 - endereços de 0 .. 9  - físico 40 .. 49 - páginas 5 e 6 
+        <— neste momento só tem 1 página livre em memória RAM e duas livres em disco
+A p1 14 <— acessa endereço 14 do p1 - página 2
+A p1 20 <— erro de acesso a página - só menciona e continua em frente 
+         - não retirem o processo 
+         - imprimam uma mensagem do tipo - “erro de acesso - p1:16:20”
+A p2 17 <— acessa o endereço 17 do p2 - página 3
+A p3 10 <— erro de acesso a página 
+         - só menciona e continua em frente - não retirem o processo 
+         - “erro de acesso - p3:10:10”
+M p1 8  <— aloca mais uma página para o p1 - endereço físico 56 .. 63 - página 7
+A p1 20 <— acessa o endereço 20 do p1
+         - agora não deve ter problema acessar o endereço 20 no p1
+M p3 5  <— aloca mais memória, mas não precisa mais páginas pois tem espaço na página 6 
+         - endereço físico 40 .. 54
+M p2 8  <— neste momento acontece page fault - sai a página 0 que está com o p1
+         - imprimir como estava a memória (RAM e disco) antes do page fault
+         - após a troca de página, imprimir como ficou a memória (RAM e disco) após o page fault
+A p1 1  <— página 0 de p1 não está na memória 
+         - page fault 
+         - sai a página 1 que está com o p1
+         - volta a página 0 de p1 que estava em disco
+         - acesso acontece normalmente e continua
+         - imprimir como estava a memória (RAM e disco) antes do page fault
+         - após a troca de página, imprimir como ficou a memória (RAM e disco) após o page fault
+A p2 20  <— acessa endereço 20 de p2 - página 3 de p1
+A p1 5
+A p1 17
+A p1 20
+A p2 7
+A p2 9
+A p2 18
+A p2 25
+A p3 0
+A p3 12
+A p1 6
+A p1 18
+A p1 8   <— aqui deve acontecer um page fault pois a página 1 está em disco
+          - pelo LRU a página que deve sair é a página 0 de p2
+M p2 10  <— aqui deve acontecer um novo page fault 
+          - pois não tem memória e alguém tem que ir para disco
+          - pelo LRU deve ser a página 1 de p2
+A p2 20
+M p1 10  <— a partir de agora qualquer alocação de memória deve dar problema
+          — imprimir mensagem do tipo: “não tem mais memória”
+
+A partir de agora diversos Acessos podem ser feitos e podem gerar page faults
+
+
+

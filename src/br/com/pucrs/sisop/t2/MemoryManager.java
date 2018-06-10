@@ -25,8 +25,30 @@ public class MemoryManager {
         this.createPages();
     }
 
-    public void access(String process, int size) {
+    public void access(String process, int memoryPosition) {
+        Process p;
 
+        if (processes.containsKey(process)) {
+            p = processes.get(process);
+
+            //Verifica se há erro de invasão de memória
+            if (!p.hasSegmentationFault(memoryPosition)) {
+                //Verifica se é possível acessar essa posição de memória
+                if (p.canAccess(memoryPosition)) {
+                    System.out.print("OK.");
+                }
+                else {
+                    //Isso significa que precisamos fazer SWAP
+                    System.out.print("SWAP necessário.");
+
+                    //Verificar se há espaço para SWAP
+                }
+            }
+            else
+                System.out.print("Segmentation fault.");
+        }
+        else
+            System.out.print("Processo não existe.");
     }
 
     public void create(String process, int size) {
@@ -34,10 +56,14 @@ public class MemoryManager {
 
         if (!processes.containsKey(process))
             if (hasEnoughSpace(size)) {
+                //Cria o processo
                 p = new Process(process, size, this.pageSize);
                 processes.put(process, p);
 
+                //Vincula as páginas
                 grantPages(p, size);
+
+                System.out.print("OK.");
             }
             else
                 System.out.print("Erro ao criar processo. Processo já existe.");
@@ -51,13 +77,10 @@ public class MemoryManager {
             p = processes.get(process);
             p.terminate();
 
-            //desalocar memória
-            deallocateMemory(p);
-
             //retiro do mapa
             processes.remove(process);
 
-            System.out.println("Processo terminado com sucesso.");
+            System.out.print("OK.");
         }
         else
             System.out.print("Processo não existe.");
@@ -70,11 +93,11 @@ public class MemoryManager {
         if (processes.containsKey(process)) {
             p = processes.get(process);
 
-            amountFree = p.sobraEspacoPaginas();
+            amountFree = p.getFreeSpaceInPages();
 
             //Tenta verificar se o processo possui páginas com espaço livre (o suficiente para permitir o increase)
             if (amountFree >= size) {
-                System.out.println("Não foi necessário alocar página. Tinha espaço sobrando.");
+                System.out.print("Espaço alocado com sucesso. Não foi necessário criar página (tinha espaço sobrando).");
                 p.increaseSize(size);
             }
             else {
@@ -86,7 +109,7 @@ public class MemoryManager {
                     p.increaseSize(size);
 
                     //print
-                    System.out.println("Espaço alocado em com sucesso.");
+                    System.out.print("Espaço alocado com sucesso. Nova página.");
                 }
                 else {
                     //TBD:
@@ -129,19 +152,9 @@ public class MemoryManager {
 
     private void createPages() {
         for (int i = 0; i < ram.length; i++)
-            ram[i] = new Page(pageSize);
+            ram[i] = new Page(pageSize, 'R');
 
-        for (int i = 0; i < disk.length; i++, i++)
-            disk[i] = new Page(pageSize);
-    }
-
-    private void deallocateMemory(Process p) {
-        for (int i = 0; i < ram.length; i++)
-            if (ram[i].getProcess() == p)
-                ram[i] = null;
-
-        for (int i = 0; i < ram.length; i++)
-            if (ram[i].getProcess() == p)
-                ram[i] = null;
+        for (int i = 0; i < disk.length; i++)
+            disk[i] = new Page(pageSize, 'D');
     }
 }

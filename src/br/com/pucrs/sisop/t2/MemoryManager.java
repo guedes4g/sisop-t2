@@ -16,6 +16,18 @@ public class MemoryManager {
     private Page[] ram;
     private Page[] disk;
 
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public int getMemorySize() {
+        return memorySize;
+    }
+
+    public int getDiskSize() {
+        return diskSize;
+    }
+
     public MemoryManager(String algo, int pageSize, int memorySize, int diskSize) {
         this.swapAlgo = algo.equals("lru") ? new LRU() : new Random(ram);
 

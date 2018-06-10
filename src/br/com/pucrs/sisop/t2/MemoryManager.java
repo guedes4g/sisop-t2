@@ -1,5 +1,7 @@
 package br.com.pucrs.sisop.t2;
 
+import br.com.pucrs.sisop.t2.model.Page;
+import br.com.pucrs.sisop.t2.model.Process;
 import br.com.pucrs.sisop.t2.swapalgo.LRU;
 import br.com.pucrs.sisop.t2.swapalgo.Random;
 import br.com.pucrs.sisop.t2.swapalgo.SwapAlgorithm;

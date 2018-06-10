@@ -1,4 +1,4 @@
-package br.com.pucrs.sisop.t2;
+package br.com.pucrs.sisop.t2.model;
 
 public class Page {
     private Process p;

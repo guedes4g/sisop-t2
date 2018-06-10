@@ -1,6 +1,6 @@
 package br.com.pucrs.sisop.t2.swapalgo;
 
-import br.com.pucrs.sisop.t2.Page;
+import br.com.pucrs.sisop.t2.model.Page;
 
 public class Random implements SwapAlgorithm {
     private int lastIndexUsed = 0;

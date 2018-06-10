@@ -1,4 +1,4 @@
-package br.com.pucrs.sisop.t2;
+package br.com.pucrs.sisop.t2.model;
 
 import java.util.ArrayList;
 import java.util.List;

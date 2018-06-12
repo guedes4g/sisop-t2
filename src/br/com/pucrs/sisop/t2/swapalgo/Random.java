@@ -3,7 +3,6 @@ package br.com.pucrs.sisop.t2.swapalgo;
 import br.com.pucrs.sisop.t2.model.Page;
 
 public class Random implements SwapAlgorithm {
-    private int lastIndexUsed = 0;
     private Page[] ram;
 
     public Random(Page[] ram) {
@@ -12,7 +11,9 @@ public class Random implements SwapAlgorithm {
 
     @Override
     public Page getPage() {
+        java.util.Random r = new java.util.Random();
+
         //Pega baseado no índice e soma
-        return ram[lastIndexUsed++];
+        return ram[r.nextInt(ram.length) -1];
     }
 }

@@ -1,5 +1,5 @@
 sequencial
-LRU
+random
 8
 64
 16

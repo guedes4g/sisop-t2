@@ -12,8 +12,9 @@ public class Random implements SwapAlgorithm {
     @Override
     public Page getPage() {
         java.util.Random r = new java.util.Random();
-
+        int i = r.nextInt(ram.length);
+        System.out.println(i);
         //Pega baseado no índice e soma
-        return ram[r.nextInt(ram.length) -1];
+        return ram[ i ];
     }
 }

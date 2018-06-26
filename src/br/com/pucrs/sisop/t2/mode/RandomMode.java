@@ -5,6 +5,16 @@ import br.com.pucrs.sisop.t2.MemoryManager;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+/*
+ * Trabalho 2 - Sistemas Operacionais para Engenharia de Software (2018/01)
+ * Professor: Avelino
+ * Alunos: Felipe Guedes e Mateus Haas
+ *
+ * Descrição do problema: desenvolver uma solução que implemente uma simulação de pagefault de processos em uma sistema operacional
+ *
+ * Classe: essa classe implementa o modo de execução "aleatório" do programa, de forma que aciona o programa em mult-threads.
+ */
+
 public class RandomMode implements Runnable {
     private int numberOfThreads;
     private double terminateProbability, addMemoryProbability;

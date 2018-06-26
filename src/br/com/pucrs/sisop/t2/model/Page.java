@@ -1,5 +1,15 @@
 package br.com.pucrs.sisop.t2.model;
 
+/*
+ * Trabalho 2 - Sistemas Operacionais para Engenharia de Software (2018/01)
+ * Professor: Avelino
+ * Alunos: Felipe Guedes e Mateus Haas
+ *
+ * Descrição do problema: desenvolver uma solução que implemente uma simulação de pagefault de processos em uma sistema operacional
+ *
+ * Classe: essa classe implementa o modelo de uma PÁGINA, de forma a classificar se a página está na RAM/DISCO e setar o último round a ser acessado.
+ */
+
 public class Page {
     private Process p;
     private char memory;

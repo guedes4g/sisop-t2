@@ -9,6 +9,16 @@ import br.com.pucrs.sisop.t2.swapalgo.SwapAlgorithm;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+ * Trabalho 2 - Sistemas Operacionais para Engenharia de Software (2018/01)
+ * Professor: Avelino
+ * Alunos: Felipe Guedes e Mateus Haas
+ *
+ * Descrição do problema: desenvolver uma solução que implemente uma simulação de pagefault de processos em uma sistema operacional
+ *
+ * Classe: essa classe implementa todos os métodos de ALOCAÇÃO, ACESSO, CRIAÇÃO e TÉRMINO de um processo e suas páginas.
+ */
+
 public class MemoryManager {
     private SwapAlgorithm swapAlgo;
     private int pageSize, memorySize, diskSize;

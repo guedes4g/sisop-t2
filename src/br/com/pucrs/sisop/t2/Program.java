@@ -6,6 +6,18 @@ import br.com.pucrs.sisop.t2.mode.SequentialMode;
 import java.io.*;
 import java.util.Scanner;
 
+/*
+ * Trabalho 2 - Sistemas Operacionais para Engenharia de Software (2018/01)
+ * Professor: Avelino
+ * Alunos: Felipe Guedes e Mateus Haas
+ *
+ * Descrição do problema: desenvolver uma solução que implemente uma simulação de pagefault de processos em uma sistema operacional
+ *
+ * Classe: é o "coração" do programa, de forma que realiza uma leitura inicial no arquivo de entrada e decide:
+ *      1. qual modo de execução
+ *      2. qual algoritmo de SWAP o programa deve executar
+ */
+
 public class Program {
     private static final String FILE_PATH_DEBUG = "./examples/e1.txt";
     private static final boolean DEBUG = true;

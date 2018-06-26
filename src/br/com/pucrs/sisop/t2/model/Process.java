@@ -3,6 +3,16 @@ package br.com.pucrs.sisop.t2.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Trabalho 2 - Sistemas Operacionais para Engenharia de Software (2018/01)
+ * Professor: Avelino
+ * Alunos: Felipe Guedes e Mateus Haas
+ *
+ * Descrição do problema: desenvolver uma solução que implemente uma simulação de pagefault de processos em uma sistema operacional
+ *
+ * Classe: essa classe implementa o modelo de um PROCESSO, onde pode fazer a validação se há segmentation fault e decisão se pode alocar mais blocos em memória.
+ */
+
 public class Process {
     public String id;
     public int pageSize;

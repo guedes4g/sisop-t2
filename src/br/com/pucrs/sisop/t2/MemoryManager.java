@@ -54,7 +54,7 @@ public class MemoryManager {
         this.swapAlgo = algo.equals("lru") ? new LRU(ram) : new Random(ram);
     }
 
-    public String access(String process, int memoryPosition) {
+    public synchronized String access(String process, int memoryPosition) {
         StringBuilder sb = new StringBuilder();
         Process p;
 
@@ -102,7 +102,7 @@ public class MemoryManager {
         return sb.toString();
     }
 
-    public String create(String process, int size) {
+    public synchronized String create(String process, int size) {
         StringBuilder sb = new StringBuilder();
         Process p;
 
@@ -136,7 +136,7 @@ public class MemoryManager {
         return sb.toString();
     }
 
-    public String terminate(String process) {
+    public synchronized String terminate(String process) {
         Process p;
 
         //sum the rounds
@@ -156,7 +156,14 @@ public class MemoryManager {
             return "Processo não existe.";
     }
 
-    public String expand(String process, int size) {
+    public Process getProcess(String key) {
+        if (processes.containsKey(key))
+            return processes.get(key);
+
+        return null;
+    }
+
+    public synchronized String expand(String process, int size) {
         int amountFree, amountNeededToAllocate;
         StringBuilder sb = new StringBuilder();
         Process p;

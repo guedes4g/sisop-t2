@@ -32,7 +32,7 @@ public class RandomMode implements Runnable {
 
     public void run() {
         for (RandomThread t : threadGroup)
-            t.run();
+            t.start();
 
         for (RandomThread t : threadGroup)
             try {
@@ -64,23 +64,27 @@ public class RandomMode implements Runnable {
             this.probabilityAllocate = probabilityAllocate;
             this.mm = mm;
             this.terminated = false;
+
             mm.create(this.processName, generateRandomProcessSize());
         }
 
         @Override
         public void run() {
-            while(!this.terminated) {
+            while (!this.terminated) {
+                int access = generateRandomMemoryAccess();
+
                 StringBuilder sb = new StringBuilder();
 
-                sb.append("["+ this.processName +"]");
-                sb.append(mm.access(this.processName, generateRandomMemoryAccess()) + '\n');
-                sb.append("["+ this.processName +"]");
+                sb.append("[" + this.processName + "] A '" + access + "' ");
+                sb.append(mm.access(this.processName, access));
 
-                if (generateRandomProbability() < probabilityTerminate) {
-                    sb.append(mm.expand(processName, generateRandomProcessSize()));
+                if (generateRandomProbability() < probabilityAllocate) {
+                    int size = generateRandomProcessSize();
+
+                    sb.append("\n[" + this.processName + "] M '" + size + "' " + mm.expand(processName, size));
+                } else if (generateRandomProbability() < probabilityTerminate) {
                     this.terminated = true;
-                } else if (generateRandomProbability() < probabilityAllocate) {
-                    sb.append(mm.terminate(processName));
+                    sb.append("\n[" + this.processName + "] T " + mm.terminate(processName));
                 }
 
                 System.out.println(sb.toString());
@@ -96,7 +100,7 @@ public class RandomMode implements Runnable {
         }
 
         private int generateRandomMemoryAccess(){
-            return ThreadLocalRandom.current().nextInt(0, this.mm.getMemorySize());
+            return ThreadLocalRandom.current().nextInt(0, mm.getProcess(processName).size);
         }
     }
 }
